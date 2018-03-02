@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-     
 """
 MIT License
 Copyright (c) 2017 - Shujian Huang <huangsj@nju.edu.cn>      
@@ -22,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-# script of python2.7
+# script of python2 or python3
 # the tokenization of Chinese text in this script contains two steps: separate each Chinese characters (by utf-8 encoding); tokenize the non Chinese part (following the mteval script). 
 # usage: python tokenizeChinese.py inputFile outputFile
 # Shujian Huang huangsj@nju.edu.cn
@@ -30,6 +29,7 @@ SOFTWARE.
 
 import re
 import sys
+import codecs
 
 
 def isChineseChar(uchar):
@@ -85,6 +85,7 @@ def isChineseChar(uchar):
     else:
         return False
 
+
 def tokenizeString(sentence, lc=False):
     """
     :param sentence: input sentence
@@ -93,49 +94,40 @@ def tokenizeString(sentence, lc=False):
 
     :return: tokenized sentence, without the line break "\\n"
     """
-   
-    sentence = sentence.decode("utf-8")
-
     sentence = sentence.strip()
-
     sentence_in_chars = ""
     for c in sentence:
         if isChineseChar(c):
             sentence_in_chars += " "
-            sentence_in_chars += c 
+            sentence_in_chars += c
             sentence_in_chars += " "
         else:
-            sentence_in_chars += c 
+            sentence_in_chars += c
     sentence = sentence_in_chars
 
     if lc:
         sentence = sentence.lower()
-    
+
     # tokenize punctuation
     sentence = re.sub(r'([\{-\~\[-\` -\&\(-\+\:-\@\/])', r' \1 ', sentence)
-    
+
     # tokenize period and comma unless preceded by a digit
     sentence = re.sub(r'([^0-9])([\.,])', r'\1 \2 ', sentence)
-    
+
     # tokenize period and comma unless followed by a digit
     sentence = re.sub(r'([\.,])([^0-9])', r' \1 \2', sentence)
-    
+
     # tokenize dash when preceded by a digit
     sentence = re.sub(r'([0-9])(-)', r'\1 \2 ', sentence)
-    
+
     # one space only between words
     sentence = re.sub(r'\s+', r' ', sentence)
-    
+
     # no leading space    
     sentence = re.sub(r'^\s+', r'', sentence)
 
     # no trailing space    
     sentence = re.sub(r'\s+$', r'', sentence)
-
-    #sentence += "\n"
-
-    sentence = sentence.encode("utf-8")
-
 
     return sentence
 
@@ -146,22 +138,21 @@ def tokenizeXMLFile(inputFile, outputFile):
 
     :param outputFile: output XML file with tokenized text 
     """
-    file_r = open(inputFile, 'r')  # input file
-    file_w = open(outputFile, 'w')  # result file
-#<seg id="1">-28 "老欧洲" Chef Found ， 就是背井离乡来到旧金山追求财富的巴西人 Mall</seg>
+    file_r = codecs.open(inputFile, 'r', encoding="utf-8")  # input file
+    file_w = codecs.open(outputFile, 'w', encoding="utf-8")  # result file
 
     for sentence in file_r:
         if sentence.startswith("<seg"):
-          start = sentence.find(">") + 1
-          end = sentence.rfind("<")
-        #new_sentence = tokenizeString(sentence)
-          new_sentence = sentence[:start] +  tokenizeString(sentence[start:end]) + sentence[end:]
+            start = sentence.find(">") + 1
+            end = sentence.rfind("<")
+            new_sentence = sentence[:start] + tokenizeString(sentence[start:end]) + sentence[end:]
         else:
-          new_sentence = sentence
+            new_sentence = tokenizeString(sentence) + "\n"
         file_w.write(new_sentence)
-    
+
     file_r.close()
     file_w.close()
+
 
 def tokenizePlainFile(inputFile, outputFile):
     """
@@ -169,15 +160,16 @@ def tokenizePlainFile(inputFile, outputFile):
     
     :param outputFile: output plain text file with tokenized text 
     """
-    file_r = open(inputFile, 'r')  # input file
-    file_w = open(outputFile, 'w')  # result file
+    file_r = codecs.open(inputFile, 'r', encoding="utf-8")  # input file
+    file_w = codecs.open(outputFile, 'w', encoding="utf-8")  # result file
 
     for sentence in file_r:
         new_sentence = tokenizeString(sentence)
-        file_w.write(new_sentence+'\n')
-    
+        file_w.write(new_sentence + '\n')
+
     file_r.close()
     file_w.close()
+
 
 if __name__ == '__main__':
     tokenizeXMLFile(sys.argv[1], sys.argv[2])
