@@ -132,7 +132,7 @@ def tokenizeString(sentence, lc=False):
     return sentence
 
 
-def tokenizeXMLFile(inputFile, outputFile):
+def tokenizeFile(inputFile, outputFile):
     """
     :param inputFile: input XML file
 
@@ -147,7 +147,7 @@ def tokenizeXMLFile(inputFile, outputFile):
             end = sentence.rfind("<")
             new_sentence = sentence[:start] + tokenizeString(sentence[start:end]) + sentence[end:]
         else:
-            new_sentence = tokenizeString(sentence) + "\n"
+            new_sentence = sentence
         file_w.write(new_sentence)
 
     file_r.close()
@@ -157,8 +157,8 @@ def tokenizeXMLFile(inputFile, outputFile):
 def tokenizePlainFile(inputFile, outputFile):
     """
     :param inputFile: input plain text file
-    
-    :param outputFile: output plain text file with tokenized text 
+
+    :param outputFile: output plain text file with tokenized text
     """
     file_r = codecs.open(inputFile, 'r', encoding="utf-8")  # input file
     file_w = codecs.open(outputFile, 'w', encoding="utf-8")  # result file
@@ -172,4 +172,4 @@ def tokenizePlainFile(inputFile, outputFile):
 
 
 if __name__ == '__main__':
-    tokenizeXMLFile(sys.argv[1], sys.argv[2])
+    tokenizeFile(sys.argv[1], sys.argv[2])
